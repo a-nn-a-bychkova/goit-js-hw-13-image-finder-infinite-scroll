@@ -1,29 +1,28 @@
+import { refs } from './refs';
 import API, { imageLimit } from './apiService';
 import debounce from 'lodash.debounce';
 import imageCardTpl from '../templates/image-card.hbs';
+
+// import './infinite-scroll';
 import '@pnotify/core/dist/PNotify.css';
 import '@pnotify/core/dist/BrightTheme.css';
 import { alert, info, error, defaultModules } from '@pnotify/core';
 
-const inputEl = document.querySelector('input[name="query"]');
-const galleryEl = document.querySelector('.js-gallery-container');
-const loadMoreButtonEl = document.querySelector('.load-more-button');
 let hits = [];
 let searchQuery;
 
-galleryEl.innerHTML = '';
+refs.galleryEl.innerHTML = '';
 
-inputEl.addEventListener('input', debounce(onInputType, 500));
-loadMoreButtonEl.addEventListener('click', onButtonClick);
+refs.inputEl.addEventListener('input', debounce(onInputType, 500));
 
 function onInputType(e) {
   e.preventDefault();
   const field = e.target;
-  galleryEl.innerHTML = '';
+  refs.galleryEl.innerHTML = '';
   hits = [];
-  searchQuery = inputEl.value;
+  searchQuery = refs.inputEl.value;
   if (searchQuery == '') {
-    galleryEl.innerHTML = '';
+    refs.galleryEl.innerHTML = '';
     return;
   }
   API(searchQuery, 1)
@@ -36,15 +35,10 @@ function renderContent(response) {
   const images = response.hits;
   hits.push(...images);
   renderImageCards(hits);
-  if (images.length === imageLimit) {
-    loadMoreButtonEl.classList.remove('hidden');
-  } else {
-    loadMoreButtonEl.classList.add('hidden');
-  }
 }
 
 function renderImageCards(images) {
-  galleryEl.innerHTML = imageCardTpl(images);
+  refs.galleryEl.innerHTML = imageCardTpl(images);
 }
 
 function onFetchError() {
@@ -55,18 +49,22 @@ function onFetchError() {
   });
 }
 
-function onButtonClick(e) {
-  const page = Math.floor(hits.length / imageLimit) + 1;
-  e.preventDefault();
-  const coordinateY = document.documentElement.scrollTop;
-  API(searchQuery, page)
-    .then(renderContent)
-    .then(() => {
-      window.scrollTo({
-        top: coordinateY,
-        left: 0,
-        behavior: 'smooth',
-      });
-    })
-    .catch(onFetchError);
-}
+const onEntry = entries => {
+  console.log('searchQuery', searchQuery);
+  entries.forEach(entry => {
+    if (entry.isIntersecting && searchQuery !== '') {
+      console.log(searchQuery);
+      console.log('it is high time for new images');
+      const page = Math.floor(hits.length / imageLimit) + 1;
+      API(searchQuery, page).then(renderContent);
+    }
+  });
+};
+
+const options = {
+  rootMargin: '150px',
+};
+
+const observer = new IntersectionObserver(onEntry, options);
+
+observer.observe(refs.sentinelEl);

@@ -1,5 +1,5 @@
 export const imageLimit = 12;
-const BASE_URL = 'https://pixabay.com';
+export const BASE_URL = 'https://pixabay.com';
 
 function fetchImages(searchQuery, page) {
   return fetch(
