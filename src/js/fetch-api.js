@@ -9,7 +9,7 @@ import '@pnotify/core/dist/BrightTheme.css';
 import { alert, info, error, defaultModules } from '@pnotify/core';
 
 let hits = [];
-let searchQuery;
+let searchQuery = '';
 
 refs.galleryEl.innerHTML = '';
 
