@@ -26,6 +26,7 @@ li {
 
 .list-group {
   display: flex;
+  justify-content: center;
   flex-direction: row;
   flex-wrap: wrap;
 }
@@ -40,4 +41,12 @@ li {
 }
 .hidden {
   display: none;
+}
+.search-form {
+  display: block;
+  text-align: center;
+}
+.input {
+  width: 400px;
+  align-items: center;
 }
